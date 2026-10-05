@@ -26,7 +26,6 @@ const style = StyleSheet.create({
         backgroundColor: colors.superficie,
         borderWidth: 1,
         borderColor: colors.borde,
-        marginRight: spacing.sm,
     },
     chipActivo: {
         backgroundColor: colors.primario,

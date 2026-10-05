@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import EstadoVacio from "../components/EstadoVacio";
+import EstadoVacio from "../components/EstadoVacio";ScrollView
 import EtiquetaNivel from "../components/EtiquetaNivel";
 import NivelChip from "../components/NivelChip";
 import Card from "../components/Card";
@@ -78,8 +78,12 @@ export default function ClasesScreen({ navigation }) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ flexGrow: 0, paddingHorizontal }}
-        contentContainerStyle={{ gap: spacing.sm, marginVertical: spacing.md }}
+        style={style.menuNiveles}
+        contentContainerStyle={{
+          paddingHorizontal,
+          alignItems: "center",
+          gap: spacing.sm,
+        }}
       >
         {NIVELES.map((item) => (
           <NivelChip
@@ -130,6 +134,11 @@ export default function ClasesScreen({ navigation }) {
 const style = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: colors.fondo },
   buscadorContainer: { gap: spacing.md, marginBottom: spacing.sm },
+  menuNiveles: {
+    flexGrow: 0,
+    height: 46,
+    marginVertical: spacing.md,
+  },
   buscador: {
     flexDirection: "row",
     alignItems: "center",
