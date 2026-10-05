@@ -17,16 +17,17 @@ import NivelChip from "../components/NivelChip";
 import Card from "../components/Card";
 import useResponsive from "../hooks/useResponsive";
 import { colors, radius, spacing, typography } from "../theme";
-import { formatearPrecio, CLASES, NIVELES } from "../data/clases";
+import { formatearPrecio, NIVELES } from "../data/clases";
+import { useReservas } from "../context/ReservasContext";
 
 export default function ClasesScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { columnas, paddingHorizontal } = useResponsive();
   const [nivel, setNivel] = useState("Todos");
   const [busqueda, setBusqueda] = useState("");
+  const { clases: clasesLista } = useReservas();
 
   // Estado local para manejar las clases y poder restar cupos en tiempo real
-  const [clasesLista, setClasesLista] = useState(CLASES);
   const resultados = useMemo(() => {
     const textoBusqueda = busqueda.trim().toLowerCase();
     return clasesLista.filter((clase) => {
@@ -39,17 +40,6 @@ export default function ClasesScreen({ navigation }) {
     });
   }, [nivel, busqueda, clasesLista]);
 
-  // Función para actualizar los cupos de una clase específica tras una reserva
-  const actualizarCuposClase = (idClase) => {
-    setClasesLista((prevClases) =>
-      prevClases.map((item) => {
-        if (item.id === idClase && item.cupos > 0) {
-          return { ...item, cupos: item.cupos - 1 };
-        }
-        return item;
-      })
-    );
-  };
 
   return (
     <View style={[style.pantalla, { paddingTop: insets.top + spacing.md }]}>
@@ -104,7 +94,6 @@ export default function ClasesScreen({ navigation }) {
             onPress={() =>
               navigation.navigate("DetallesClase", {
                 clase: item,
-                onReservarExitoso: actualizarCuposClase, // Pasamos la función como parámetro
               })
             }
           />

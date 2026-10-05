@@ -16,10 +16,12 @@ import { colors, radius, spacing, typography, sombra } from "../theme";
 import { formatearPrecio } from "../data/clases";
 import EtiquetaNivel from "../components/EtiquetaNivel";
 
+import { useReservas } from "../context/ReservasContext";
+
 export default function DetallesClase({ route, navigation }) {
+  const { agregarReserva } = useReservas();
   const insets = useSafeAreaInsets();
   const claseParam = route?.params?.clase;
-  const onReservarExitoso = route?.params?.onReservarExitoso;
   const { paddingHorizontal, esTablet } = useResponsive();
 
   // Estado local de la clase para actualizar los cupos en tiempo real en esta vista
@@ -41,16 +43,11 @@ export default function DetallesClase({ route, navigation }) {
       return;
     }
 
-    // 1. Restamos un cupo en el estado local de los detalles
-    setClaseDetalle((prev) => ({
-      ...prev,
-      cupos: prev.cupos - 1,
-    }));
 
-    // 2. Ejecutamos la función que viene de ClasesScreen para actualizar la lista principal
-    if (onReservarExitoso) {
-      onReservarExitoso(claseDetalle.id);
-    }
+    agregarReserva({
+      ...claseDetalle,
+      horario: horarioSeleccionado,
+    });
 
     Alert.alert(
       "¡Reserva Exitosa!",

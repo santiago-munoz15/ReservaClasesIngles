@@ -5,6 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import ClasesStack from "./ClasesStack";
 import { colors } from "../theme";
 
+import ReservasScreen from "../screens/ReservasScreen";
+
 const Tab = createBottomTabNavigator();
 
 export default function MainTabs() {
@@ -46,7 +48,7 @@ export default function MainTabs() {
 
           <Tab.Screen
               name="Mis Reservas"
-              component={ClasesStack}
+              component={ReservasScreen}
               options={{
                   tabBarIcon: ({ color, size, focused }) => (
                       <Ionicons
