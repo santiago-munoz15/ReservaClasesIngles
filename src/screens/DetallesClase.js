@@ -19,7 +19,7 @@ import EtiquetaNivel from "../components/EtiquetaNivel";
 import { useReservas } from "../context/ReservasContext";
 
 export default function DetallesClase({ route, navigation }) {
-  const { agregarReserva } = useReservas();
+  const { reservas, agregarReserva } = useReservas();
   const insets = useSafeAreaInsets();
   const claseParam = route?.params?.clase;
   const { paddingHorizontal, esTablet } = useResponsive();
@@ -35,6 +35,30 @@ export default function DetallesClase({ route, navigation }) {
   const handleReservar = () => {
     if (!horarioSeleccionado) {
       Alert.alert("Horario requerido", "Por favor selecciona un horario antes de confirmar tu reserva.");
+      return;
+    }
+
+    const reservaExistente = reservas.find(
+      (reserva) => reserva.id === claseDetalle.id
+    );
+
+    if (reservaExistente) {
+      Alert.alert(
+        "Clase ya reservada",
+        "Ya tienes una reserva para esta clase."
+      );
+      return;
+    }
+
+    const horarioOcupado = reservas.some(
+      (reserva) => reserva.horario === horarioSeleccionado
+    );
+
+    if (horarioOcupado) {
+      Alert.alert(
+        "Horario ocupado",
+        "Ya tienes otra reserva en este horario. Selecciona un horario diferente."
+      );
       return;
     }
 
