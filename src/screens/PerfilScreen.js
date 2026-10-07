@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors, radius, spacing, typography, sombra } from "../theme";
 import useAlmacenamiento from "../hooks/useAlmacenamiento";
+import InfoPerfil from "../components/InfoPerfil";
 
 // Datos de ejemplo: en el commit 5 el perfil empezará vacío (null)
 const PERFIL_EJEMPLO = {
@@ -155,64 +156,7 @@ export default function PerfilScreen() {
             </Pressable>
           </>
         ) : (
-          <>
-            <View style={[styles.tarjetaPerfil, sombra]}>
-              <View style={styles.avatar}>
-                <Ionicons name="person" size={45} color={colors.primario} />
-              </View>
-
-              <Text style={styles.nombre}>{perfil.nombre}</Text>
-              <Text style={styles.correo}>{perfil.correo}</Text>
-            </View>
-
-            <View style={[styles.seccion, sombra]}>
-              <Text style={styles.tituloSeccion}>Información personal</Text>
-
-              <View style={styles.fila}>
-                <Ionicons
-                  name="person-outline"
-                  size={22}
-                  color={colors.primario}
-                />
-
-                <View>
-                  <Text style={styles.etiqueta}>Nombre</Text>
-                  <Text style={styles.valor}>{perfil.nombre}</Text>
-                </View>
-              </View>
-
-              <View style={styles.fila}>
-                <Ionicons
-                  name="mail-outline"
-                  size={22}
-                  color={colors.primario}
-                />
-
-                <View>
-                  <Text style={styles.etiqueta}>Correo</Text>
-                  <Text style={styles.valor}>{perfil.correo}</Text>
-                </View>
-              </View>
-
-              <View style={styles.fila}>
-                <Ionicons
-                  name="call-outline"
-                  size={22}
-                  color={colors.primario}
-                />
-
-                <View>
-                  <Text style={styles.etiqueta}>Teléfono</Text>
-                  <Text style={styles.valor}>{perfil.telefono}</Text>
-                </View>
-              </View>
-            </View>
-
-            <Pressable style={styles.boton} onPress={abrirFormulario}>
-              <Ionicons name="create-outline" size={20} color="#FFFFFF" />
-              <Text style={styles.textoBoton}>Editar perfil</Text>
-            </Pressable>
-          </>
+          <InfoPerfil perfil={perfil} onEditar={abrirFormulario} />
         )}
       </ScrollView>
     </View>
@@ -230,67 +174,11 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
 
-  tarjetaPerfil: {
-    alignItems: "center",
-    backgroundColor: colors.superficie,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    marginTop: spacing.lg,
-  },
-
-  avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: radius.full,
-    backgroundColor: colors.primarioSuave,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  nombre: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.texto,
-    marginTop: spacing.md,
-  },
-
-  correo: {
-    fontSize: 14,
-    color: colors.textoSuave,
-    marginTop: spacing.xs,
-  },
-
   seccion: {
     backgroundColor: colors.superficie,
     borderRadius: radius.lg,
     padding: spacing.lg,
     marginTop: spacing.lg,
-  },
-
-  tituloSeccion: {
-    ...typography.subtitulo,
-    marginBottom: spacing.md,
-  },
-
-  fila: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borde,
-  },
-
-  etiqueta: {
-    fontSize: 12,
-    color: colors.textoSuave,
-  },
-
-  valor: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.texto,
-    marginTop: 2,
   },
 
   // Formulario
