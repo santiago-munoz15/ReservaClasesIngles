@@ -6,6 +6,9 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,11 +17,11 @@ import { colors, radius, spacing, typography, sombra } from "../theme";
 import useAlmacenamiento from "../hooks/useAlmacenamiento";
 import InfoPerfil from "../components/InfoPerfil";
 
-// Datos de ejemplo: en el commit 5 el perfil empezará vacío (null)
-const PERFIL_EJEMPLO = {
-  nombre: "Usuario",
-  correo: "usuario@email.com",
-  telefono: "300 000 0000",
+// Formulario en blanco: se usa cuando la persona aún no está registrada
+const FORMULARIO_VACIO = {
+  nombre: "",
+  correo: "",
+  telefono: "",
 };
 
 // Reglas de negocio del perfil. Devuelve un mensaje por cada campo inválido;
@@ -64,14 +67,15 @@ export default function PerfilScreen() {
   const insets = useSafeAreaInsets();
 
   // El perfil se guarda en el celular, así sigue ahí al cerrar la app
+  // perfil = null significa que la persona todavía no está registrada
   const {
     valor: perfil,
     actualizar: guardarPerfil,
     listo,
-  } = useAlmacenamiento("@reservaclases:perfil", PERFIL_EJEMPLO);
+  } = useAlmacenamiento("@reservaclases:perfil_registro", null);
 
   const [mostrandoFormulario, setMostrandoFormulario] = useState(false);
-  const [form, setForm] = useState(PERFIL_EJEMPLO);
+  const [form, setForm] = useState(FORMULARIO_VACIO);
   const [errores, setErrores] = useState({});
 
   // Espera a que termine de leer lo guardado
@@ -83,9 +87,9 @@ export default function PerfilScreen() {
     if (errores[campo]) setErrores((e) => ({ ...e, [campo]: undefined }));
   };
 
-  // Regla: al editar, el formulario se abre con los datos actuales cargados
+  // Regla: registrar abre el formulario vacío; editar lo abre con los datos cargados
   const abrirFormulario = () => {
-    setForm({ ...perfil });
+    setForm(perfil ? { ...perfil } : FORMULARIO_VACIO);
     setErrores({});
     setMostrandoFormulario(true);
   };
@@ -105,16 +109,34 @@ export default function PerfilScreen() {
       telefono: form.telefono.trim(),
     });
     setMostrandoFormulario(false);
+    Alert.alert(
+      perfil ? "Perfil actualizado" : "¡Registro exitoso!",
+      "Tus datos se guardaron correctamente.",
+    );
+  };
+
+  // Regla: cancelar cierra el formulario sin perder lo que ya estaba guardado
+  const cancelar = () => {
+    setErrores({});
+    setMostrandoFormulario(false);
   };
 
   return (
-    <View style={[styles.pantalla, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView
+      style={[styles.pantalla, { paddingTop: insets.top }]}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.contenido}
       >
         <Text style={typography.titulo}>
-          {mostrandoFormulario ? "Editar perfil" : "Mi Perfil"}
+          {mostrandoFormulario
+            ? perfil
+              ? "Editar perfil"
+              : "Registro"
+            : "Mi Perfil"}
         </Text>
 
         {mostrandoFormulario ? (
@@ -152,14 +174,42 @@ export default function PerfilScreen() {
 
             <Pressable style={styles.boton} onPress={guardar}>
               <Ionicons name="checkmark-outline" size={20} color="#FFFFFF" />
-              <Text style={styles.textoBoton}>Guardar cambios</Text>
+              <Text style={styles.textoBoton}>
+                {perfil ? "Guardar cambios" : "Registrarme"}
+              </Text>
+            </Pressable>
+
+            <Pressable style={styles.botonCancelar} onPress={cancelar}>
+              <Text style={styles.textoCancelar}>Cancelar</Text>
             </Pressable>
           </>
-        ) : (
+        ) : perfil ? (
+          // Ya está registrada: solo se muestra su información
           <InfoPerfil perfil={perfil} onEditar={abrirFormulario} />
+        ) : (
+          // Sin registro: mensaje y botón para mostrar el formulario
+          <View style={[styles.vacio, sombra]}>
+            <View style={styles.avatarVacio}>
+              <Ionicons
+                name="person-outline"
+                size={45}
+                color={colors.textoSuave}
+              />
+            </View>
+
+            <Text style={styles.tituloVacio}>Aún no estás registrado</Text>
+            <Text style={styles.mensajeVacio}>
+              Regístrate para guardar tus datos y reservar tus clases de inglés.
+            </Text>
+
+            <Pressable style={styles.botonRegistro} onPress={abrirFormulario}>
+              <Ionicons name="person-add-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.textoBoton}>Registrarme</Text>
+            </Pressable>
+          </View>
         )}
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -229,5 +279,64 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "700",
+  },
+
+  botonCancelar: {
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.borde,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    marginTop: spacing.md,
+  },
+
+  textoCancelar: {
+    color: colors.textoSuave,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+
+  // Estado "sin registro"
+  vacio: {
+    alignItems: "center",
+    backgroundColor: colors.superficie,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    marginTop: spacing.lg,
+  },
+
+  avatarVacio: {
+    width: 90,
+    height: 90,
+    borderRadius: radius.full,
+    backgroundColor: colors.borde,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  tituloVacio: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: colors.texto,
+    marginTop: spacing.lg,
+  },
+
+  mensajeVacio: {
+    fontSize: 14,
+    color: colors.textoSuave,
+    textAlign: "center",
+    marginTop: spacing.sm,
+  },
+
+  botonRegistro: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: spacing.sm,
+    alignSelf: "stretch",
+    backgroundColor: colors.primario,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    marginTop: spacing.xl,
   },
 });
