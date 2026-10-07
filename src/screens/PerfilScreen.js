@@ -20,16 +20,41 @@ const PERFIL_EJEMPLO = {
   telefono: "300 000 0000",
 };
 
-// Campo de texto reutilizable para el formulario
-function Campo({ etiqueta, ...props }) {
+// Reglas de negocio del perfil. Devuelve un mensaje por cada campo inválido;
+// si el objeto sale vacío ({}), los datos son válidos.
+function validarPerfil({ nombre, correo, telefono }) {
+  const errores = {};
+
+  // Nombre obligatorio: mínimo 3 letras
+  if (nombre.trim().length < 3) {
+    errores.nombre = "Escribe tu nombre completo (mínimo 3 letras).";
+  }
+
+  // Correo obligatorio: debe tener formato válido
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo.trim())) {
+    errores.correo = "Escribe un correo válido, por ejemplo nombre@correo.com.";
+  }
+
+  // Teléfono opcional: si se escribe, entre 7 y 12 dígitos
+  const digitos = telefono.replace(/\D/g, "");
+  if (telefono.trim() !== "" && (digitos.length < 7 || digitos.length > 12)) {
+    errores.telefono = "El teléfono debe tener entre 7 y 12 dígitos.";
+  }
+
+  return errores;
+}
+
+// Campo de texto reutilizable para el formulario (muestra su error debajo)
+function Campo({ etiqueta, error, ...props }) {
   return (
     <View style={styles.campo}>
       <Text style={styles.etiquetaCampo}>{etiqueta}</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, error && styles.inputError]}
         placeholderTextColor={colors.textoSuave}
         {...props}
       />
+      {error ? <Text style={styles.textoError}>{error}</Text> : null}
     </View>
   );
 }
@@ -46,21 +71,33 @@ export default function PerfilScreen() {
 
   const [mostrandoFormulario, setMostrandoFormulario] = useState(false);
   const [form, setForm] = useState(PERFIL_EJEMPLO);
+  const [errores, setErrores] = useState({});
 
   // Espera a que termine de leer lo guardado
   if (!listo) return null;
 
-  const cambiar = (campo) => (valor) =>
+  const cambiar = (campo) => (valor) => {
     setForm((anterior) => ({ ...anterior, [campo]: valor }));
+    // Al corregir un campo, se quita su error
+    if (errores[campo]) setErrores((e) => ({ ...e, [campo]: undefined }));
+  };
 
   // Regla: al editar, el formulario se abre con los datos actuales cargados
   const abrirFormulario = () => {
     setForm({ ...perfil });
+    setErrores({});
     setMostrandoFormulario(true);
   };
 
   // Regla: solo existe un perfil; guardar reemplaza los datos anteriores
   const guardar = async () => {
+    // Regla: no se guarda mientras haya errores
+    const nuevosErrores = validarPerfil(form);
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErrores(nuevosErrores);
+      return;
+    }
+
     await guardarPerfil({
       nombre: form.nombre.trim(),
       correo: form.correo.trim(),
@@ -83,26 +120,29 @@ export default function PerfilScreen() {
           <>
             <View style={[styles.seccion, sombra]}>
               <Campo
-                etiqueta="Nombre completo"
+                etiqueta="Nombre completo *"
                 value={form.nombre}
                 onChangeText={cambiar("nombre")}
+                error={errores.nombre}
                 placeholder="Ej: Laura Gómez"
                 autoCapitalize="words"
                 maxLength={40}
               />
               <Campo
-                etiqueta="Correo electrónico"
+                etiqueta="Correo electrónico *"
                 value={form.correo}
                 onChangeText={cambiar("correo")}
+                error={errores.correo}
                 placeholder="nombre@correo.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
               <Campo
-                etiqueta="Teléfono"
+                etiqueta="Teléfono (opcional)"
                 value={form.telefono}
                 onChangeText={cambiar("telefono")}
+                error={errores.telefono}
                 placeholder="300 123 4567"
                 keyboardType="phone-pad"
                 maxLength={15}
@@ -274,6 +314,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.texto,
     backgroundColor: colors.fondo,
+  },
+
+  inputError: {
+    borderColor: colors.peligro,
+  },
+
+  textoError: {
+    fontSize: 12,
+    color: colors.peligro,
+    marginTop: spacing.xs,
   },
 
   boton: {
