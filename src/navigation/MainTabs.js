@@ -6,6 +6,7 @@ import ClasesStack from "./ClasesStack";
 import { colors } from "../theme";
 
 import ReservasScreen from "../screens/ReservasScreen";
+import PerfilScreen from "../screens/PerfilScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -17,62 +18,62 @@ export default function MainTabs() {
         tabBarActiveTintColor: colors.primario,
         tabBarInactiveTintColor: colors.textoSuave,
 
-              tabBarStyle: {
-                  height: 65,
-                  paddingTop: 5,
-                  paddingBottom: 5,
-                  backgroundColor: colors.superficie,
-                  borderTopWidth: 1,
-                  borderTopColor: colors.borde,
-              },
+        tabBarStyle: {
+          height: 65,
+          paddingTop: 5,
+          paddingBottom: 5,
+          backgroundColor: colors.superficie,
+          borderTopWidth: 1,
+          borderTopColor: colors.borde,
+        },
 
-              tabBarLabelStyle: {
-                  fontSize: 12,
-                  fontWeight: "600",
-              },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
       }}
     >
-          <Tab.Screen
-              name="Clases"
-              component={ClasesStack}
-              options={{
-                  tabBarIcon: ({ color, size, focused }) => (
-                      <Ionicons
-                          name={focused ? "book" : "book-outline"}
-                          size={size}
-                          color={color}
-                      />
-                  ),
-              }}
-          />
+      <Tab.Screen
+        name="Clases"
+        component={ClasesStack}
+        options={{
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "book" : "book-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
 
-          <Tab.Screen
-              name="Mis Reservas"
-              component={ReservasScreen}
-              options={{
-                  tabBarIcon: ({ color, size, focused }) => (
-                      <Ionicons
-                          name={focused ? "calendar" : "calendar-outline"}
-                          size={size}
-                          color={color}
-                      />
-                  ),
-              }}
-          />
+      <Tab.Screen
+        name="Mis Reservas"
+        component={ReservasScreen}
+        options={{
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "calendar" : "calendar-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
 
-          <Tab.Screen
-              name="Perfil"
-              component={ClasesStack}
-              options={{
-                  tabBarIcon: ({ color, size, focused }) => (
-                      <Ionicons
-                          name={focused ? "person" : "person-outline"}
-                          size={size}
-                          color={color}
-                      />
-                  ),
-              }}
-          />
+      <Tab.Screen
+        name="Perfil"
+        component={PerfilScreen}
+        options={{
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
