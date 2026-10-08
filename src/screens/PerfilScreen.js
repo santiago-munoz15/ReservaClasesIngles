@@ -278,7 +278,7 @@ useEffect(() => {
               onPress={borrarPerfilPrueba}
             >
               <Text style={styles.textoCancelar}>
-                Borrar perfil para prueba
+                Eliminar perfil
               </Text>
             </Pressable>
           </>
