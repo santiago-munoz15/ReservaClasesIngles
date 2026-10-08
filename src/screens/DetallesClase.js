@@ -173,6 +173,19 @@ export default function DetallesClase({ route, navigation }) {
               );
             })}
           </View>
+          <Pressable
+            style={estilos.botonVerReservas}
+            onPress={() => navigation.getParent()?.navigate("Mis Reservas")}
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={20}
+              color={colors.primario}
+            />
+            <Text style={estilos.textoVerReservas}>
+              Ver mis reservas
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
 
@@ -286,6 +299,23 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.primario,
     borderColor: colors.primario,
   },
+  botonVerReservas: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: spacing.sm,
+  borderWidth: 1,
+  borderColor: colors.primario,
+  borderRadius: radius.md,
+  paddingVertical: spacing.md,
+  marginTop: spacing.lg,
+},
+
+textoVerReservas: {
+  color: colors.primario,
+  fontSize: 15,
+  fontWeight: "700",
+},
   textoChipHorario: { fontSize: 14, fontWeight: '600', color: colors.texto },
   textoChipHorarioActivo: { color: '#FFFFFF' },
   barraInferior: {

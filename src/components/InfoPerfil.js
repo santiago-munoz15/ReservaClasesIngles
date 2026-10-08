@@ -39,15 +39,35 @@ export default function InfoPerfil({ perfil, onEditar }) {
           etiqueta="Nombre"
           valor={perfil.nombre}
         />
+
+        <FilaDato
+          icono="person-outline"
+          etiqueta="Apellido"
+          valor={perfil.apellido}
+        />
+
         <FilaDato
           icono="mail-outline"
           etiqueta="Correo"
           valor={perfil.correo}
         />
+
         <FilaDato
           icono="call-outline"
           etiqueta="Teléfono"
           valor={perfil.telefono || "No registrado"}
+        />
+
+        <FilaDato
+          icono="card-outline"
+          etiqueta="Cédula de Ciudadanía"
+          valor={perfil.cedula}
+        />
+
+        <FilaDato
+          icono="school-outline"
+          etiqueta="Nivel de inglés"
+          valor={perfil.nivel}
         />
       </View>
 

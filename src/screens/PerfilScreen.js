@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -20,29 +20,47 @@ import InfoPerfil from "../components/InfoPerfil";
 // Formulario en blanco: se usa cuando la persona aún no está registrada
 const FORMULARIO_VACIO = {
   nombre: "",
+  apellido: "",
   correo: "",
   telefono: "",
+  cedula: "",
+  nivel: "",
 };
 
 // Reglas de negocio del perfil. Devuelve un mensaje por cada campo inválido;
 // si el objeto sale vacío ({}), los datos son válidos.
-function validarPerfil({ nombre, correo, telefono }) {
+function validarPerfil({ nombre, apellido, correo, telefono, cedula, nivel }) {
   const errores = {};
 
-  // Nombre obligatorio: mínimo 3 letras
   if (nombre.trim().length < 3) {
-    errores.nombre = "Escribe tu nombre completo (mínimo 3 letras).";
+    errores.nombre = "Escribe tu nombre (mínimo 3 letras).";
   }
 
-  // Correo obligatorio: debe tener formato válido
+  if (apellido.trim().length < 3) {
+    errores.apellido = "Escribe tu apellido (mínimo 3 letras).";
+  }
+
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo.trim())) {
     errores.correo = "Escribe un correo válido, por ejemplo nombre@correo.com.";
   }
 
-  // Teléfono opcional: si se escribe, entre 7 y 12 dígitos
-  const digitos = telefono.replace(/\D/g, "");
-  if (telefono.trim() !== "" && (digitos.length < 7 || digitos.length > 12)) {
+  const digitosTelefono = telefono.replace(/\D/g, "");
+
+  if (
+    telefono.trim() !== "" &&
+    (digitosTelefono.length < 7 || digitosTelefono.length > 12)
+  ) {
     errores.telefono = "El teléfono debe tener entre 7 y 12 dígitos.";
+  }
+
+  const digitosCedula = cedula.replace(/\D/g, "");
+
+  if (digitosCedula.length < 6 || digitosCedula.length > 10) {
+    errores.cedula = "La cédula debe tener entre 6 y 10 dígitos.";
+  }
+
+  if (!nivel) {
+    errores.nivel = "Selecciona tu nivel de inglés.";
   }
 
   return errores;
@@ -74,12 +92,24 @@ export default function PerfilScreen() {
     listo,
   } = useAlmacenamiento("@reservaclases:perfil_registro", null);
 
-  const [mostrandoFormulario, setMostrandoFormulario] = useState(false);
-  const [form, setForm] = useState(FORMULARIO_VACIO);
-  const [errores, setErrores] = useState({});
+const [mostrandoFormulario, setMostrandoFormulario] = useState(false);
+const [form, setForm] = useState(FORMULARIO_VACIO);
+const [errores, setErrores] = useState({});
+
+useEffect(() => {
+  if (listo && !perfil) {
+    setForm(FORMULARIO_VACIO);
+    setErrores({});
+    setMostrandoFormulario(true);
+  }
+}, [listo, perfil]);
 
   // Espera a que termine de leer lo guardado
   if (!listo) return null;
+
+ if (mostrandoFormulario === null) {
+  setMostrandoFormulario(!perfil);
+}
 
   const cambiar = (campo) => (valor) => {
     setForm((anterior) => ({ ...anterior, [campo]: valor }));
@@ -94,6 +124,11 @@ export default function PerfilScreen() {
     setMostrandoFormulario(true);
   };
 
+  const borrarPerfilPrueba = async () => {
+    await guardarPerfil(null);
+    setMostrandoFormulario(false);
+  };
+
   // Regla: solo existe un perfil; guardar reemplaza los datos anteriores
   const guardar = async () => {
     // Regla: no se guarda mientras haya errores
@@ -105,8 +140,11 @@ export default function PerfilScreen() {
 
     await guardarPerfil({
       nombre: form.nombre.trim(),
+      apellido: form.apellido.trim(),
       correo: form.correo.trim(),
       telefono: form.telefono.trim(),
+      cedula: form.cedula.trim(),
+      nivel: form.nivel,
     });
     setMostrandoFormulario(false);
     Alert.alert(
@@ -143,11 +181,21 @@ export default function PerfilScreen() {
           <>
             <View style={[styles.seccion, sombra]}>
               <Campo
-                etiqueta="Nombre completo *"
+                etiqueta="Nombre *"
                 value={form.nombre}
                 onChangeText={cambiar("nombre")}
                 error={errores.nombre}
-                placeholder="Ej: Laura Gómez"
+                placeholder="Ej: Santiago"
+                autoCapitalize="words"
+                maxLength={30}
+              />
+
+              <Campo
+                etiqueta="Apellido *"
+                value={form.apellido}
+                onChangeText={cambiar("apellido")}
+                error={errores.apellido}
+                placeholder="Ej: Muñoz"
                 autoCapitalize="words"
                 maxLength={40}
               />
@@ -170,6 +218,48 @@ export default function PerfilScreen() {
                 keyboardType="phone-pad"
                 maxLength={15}
               />
+
+              <Campo
+                etiqueta="Cédula de Ciudadanía *"
+                value={form.cedula}
+                onChangeText={cambiar("cedula")}
+                error={errores.cedula}
+                placeholder="Ej: 1234567890"
+                keyboardType="numeric"
+                maxLength={10}
+              />
+
+              <Text style={styles.etiquetaCampo}>
+                Nivel de inglés *
+              </Text>
+
+              <View style={styles.niveles}>
+                {["Basico", "Intermedio", "Avanzado", "Conversacional"].map(
+                  (nivel) => (
+                    <Pressable
+                      key={nivel}
+                      style={[
+                        styles.nivel,
+                        form.nivel === nivel && styles.nivelActivo,
+                      ]}
+                      onPress={() => cambiar("nivel")(nivel)}
+                    >
+                      <Text
+                        style={[
+                          styles.textoNivel,
+                          form.nivel === nivel && styles.textoNivelActivo,
+                        ]}
+                      >
+                        {nivel}
+                      </Text>
+                    </Pressable>
+                  )
+                )}
+              </View>
+
+              {errores.nivel ? (
+                <Text style={styles.textoError}>{errores.nivel}</Text>
+              ) : null}
             </View>
 
             <Pressable style={styles.boton} onPress={guardar}>
@@ -181,6 +271,15 @@ export default function PerfilScreen() {
 
             <Pressable style={styles.botonCancelar} onPress={cancelar}>
               <Text style={styles.textoCancelar}>Cancelar</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.botonCancelar}
+              onPress={borrarPerfilPrueba}
+            >
+              <Text style={styles.textoCancelar}>
+                Borrar perfil para prueba
+              </Text>
             </Pressable>
           </>
         ) : perfil ? (
@@ -262,6 +361,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.peligro,
     marginTop: spacing.xs,
+  },
+
+  niveles: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+
+  nivel: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.borde,
+    backgroundColor: colors.superficie,
+  },
+
+  nivelActivo: {
+    backgroundColor: colors.primario,
+    borderColor: colors.primario,
+  },
+
+  textoNivel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.textoSuave,
+  },
+
+  textoNivelActivo: {
+    color: "#FFFFFF",
   },
 
   boton: {
